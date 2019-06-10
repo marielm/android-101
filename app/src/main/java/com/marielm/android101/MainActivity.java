@@ -8,6 +8,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import javax.xml.transform.Result;
+
 public class MainActivity extends AppCompatActivity {
 
     private String baseMessage;
@@ -27,19 +29,9 @@ public class MainActivity extends AppCompatActivity {
             @Override public void onClick(View view) {
 
                 String inputName = input.getText().toString(); // get the input text
-                String formattedMessage = String.format(baseMessage, inputName); // format the string!
 
-                // create a dialog that dismisses when clicking done
-                new AlertDialog.Builder(MainActivity.this)
-                        .setMessage(formattedMessage)
-                        .setCancelable(true)
-                        .setPositiveButton(R.string.done, new DialogInterface.OnClickListener() {
-                            @Override public void onClick(DialogInterface dialogInterface, int i) {
-                                dialogInterface.dismiss();
-                            }
-                        })
-                        .create()
-                        .show();
+                startActivity(ResultsActivity.create(MainActivity.this, inputName));
+
             }
         });
     }

@@ -4,17 +4,21 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.Toolbar;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import retrofit2.Call;
@@ -31,6 +35,7 @@ public class ResultsActivity extends AppCompatActivity {
   private RecyclerView recyclerView;
   private Toolbar toolbar;
   private MyAdapter adapter;
+
 
   public static Intent create(Context context, String username) {
     return new Intent(context, ResultsActivity.class)
@@ -57,7 +62,7 @@ public class ResultsActivity extends AppCompatActivity {
 
 
     // retrieve username from intent extras bundle
-    // TODO
+    String githubUsername = getIntent().getExtras().getString(EXTRA_USERNAME);
 
 
     // create & set adapter
@@ -76,18 +81,22 @@ public class ResultsActivity extends AppCompatActivity {
 
 
     // make api call
-    service.getRepositories("")
+    service.getRepositories(githubUsername)
         .enqueue(new Callback<List<Repository>>() {
           @Override
           public void onResponse(Call<List<Repository>> call, Response<List<Repository>> response) {
-            // hide progress
-            // display results
+            showProgress(false);
+            if (response.isSuccessful()) {
+              adapter.setData(response.body());
+            } else {
+              showError(new Throwable("response was not successful! :O"));
+            }
           }
 
           @Override
           public void onFailure(Call<List<Repository>> call, Throwable t) {
-            // hide progress
-            // show error
+            showProgress(false);
+            showError(t);
           }
         });
   }
@@ -98,7 +107,7 @@ public class ResultsActivity extends AppCompatActivity {
    * @param error comes back from onFailure case
    */
   private void showError(Throwable error) {
-    Toast.makeText(ResultsActivity.this, error.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+    Toast.makeText(ResultsActivity.this, error.getLocalizedMessage(), Toast.LENGTH_LONG).show();
   }
 
   /**
@@ -123,7 +132,7 @@ public class ResultsActivity extends AppCompatActivity {
     @Override
     public RepositoryViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
       View view = LayoutInflater.from(parent.getContext())
-          .inflate(R.layout.row_item_repo, parent);
+          .inflate(R.layout.row_item_repo, parent, false);
 
       return new RepositoryViewHolder(view);
     }
@@ -149,18 +158,47 @@ public class ResultsActivity extends AppCompatActivity {
     private final TextView name;
     private final TextView description;
     private final TextView updatedOn;
+    private View itemView;
 
     public RepositoryViewHolder(View itemView) {
       super(itemView);
 
-      idView = findViewById(R.id.id);
-      name = findViewById(R.id.name);
-      description = findViewById(R.id.description);
-      updatedOn = findViewById(R.id.updated_on);
+      idView = itemView.findViewById(R.id.id);
+      name = itemView.findViewById(R.id.name);
+      description = itemView.findViewById(R.id.description);
+      updatedOn = itemView.findViewById(R.id.updated_on);
+      this.itemView = itemView;
     }
 
-    public void bind(Repository repo) {
+    public void bind(final Repository repo) {
 
+      itemView.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+          Snackbar.make(itemView, String.valueOf(repo.watchers), Snackbar.LENGTH_SHORT).show();
+        }
+      });
+
+      idView.setText(String.valueOf(repo.id));
+      name.setText(repo.name);
+
+      if (TextUtils.isEmpty(repo.description)) {
+        description.setText(getString(R.string.add_desc));
+      } else {
+        description.setText(repo.description);
+      }
+
+      // try to format date/time coming back
+      try {
+        SimpleDateFormat currentFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+        Date parsedDate = currentFormat.parse(repo.updatedOn);
+
+        SimpleDateFormat formatted = new SimpleDateFormat("dd-MM-yyyy");
+        String formattedDate = formatted.format(parsedDate);
+        updatedOn.setText(formattedDate);
+      } catch (Exception e) {
+        updatedOn.setText(repo.updatedOn);
+      }
     }
   }
 }

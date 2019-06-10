@@ -6,6 +6,7 @@
     <string name="hi_there_name">Hi there %s!</string>
     <string name="done">done</string>
     <string name="my_username_is">my username is</string>
-    <string name="github_prompot">Enter your github username</string>
+    <string name="github_prompt">Enter your github username</string>
     <string name="results">Results</string>
+    <string name="add_desc">please add a description!</string>
 </resources>

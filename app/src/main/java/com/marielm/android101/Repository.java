@@ -9,6 +9,12 @@ public class Repository {
   @SerializedName("description")
   public String description;
 
+  @SerializedName("updated_at")
+  public String updatedOn;
 
-  // add updated on & ID
+  @SerializedName("id")
+  public long id;
+
+  @SerializedName("watchers_count")
+  public int watchers;
 }
