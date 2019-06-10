@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">android101</string>
+    <string name="hello_what_s_your_name">Hello! What\'s your name?</string>
+    <string name="my_name_is">my name is</string>
+    <string name="submit">submit</string>
+    <string name="hi_there_name">Hi there %s!</string>
+    <string name="done">done</string>
+</resources>
